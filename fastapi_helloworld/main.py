@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from typing import Union, Optional, Annotated
 from fastapi_helloworld import settings
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-from fastapi import FastAPI, Query, Path
+from sqlmodel import Session, SQLModel, create_engine, select
+from fastapi import FastAPI, Query, Path, Body
 
 
 # class Todo(SQLModel, table=True):
@@ -125,3 +125,77 @@ async def read_items_id(
         results.update({"q": q})
     return results
 
+# from pydantic import BaseModel
+
+# class Item(BaseModel):
+#     name: str
+#     description: str | None = None
+#     price: float
+#     tax: float | None = None
+
+
+# class User(BaseModel):
+#     username: str
+#     full_name: str | None = None
+
+
+# # @app.put("/items/{item_id}")
+# # async def update_item(item_id: int, item: Item, user: User, importance: Annotated[int, Body()]):
+# #     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+# #     return results
+
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+#     results = {"item_id": item_id, "item": item}
+#     return results
+
+from pydantic import BaseModel, Field
+
+
+# class Item(BaseModel):
+#     name: str
+#     description: str | None = Field(
+#         default=None, title="The description of the item", max_length=200
+#     )
+#     price: float = Field(gt=0, description="The price must be greater than zero")
+#     tax: float | None = None
+
+
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+#     results = {"item_id": item_id, "item": item}
+#     return results
+
+from pydantic import HttpUrl
+
+
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
+    image: list[Image] | None = None
+
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item):
+    results = {"item_id": item_id, "item": item}
+    return results
+
+
+class Offer(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    items: list[Item]
+
+
+@app.post("/offers/")
+async def create_offer(offer: Offer):
+    return offer
