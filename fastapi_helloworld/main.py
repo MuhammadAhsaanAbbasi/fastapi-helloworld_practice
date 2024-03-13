@@ -117,7 +117,7 @@ async def read_item(
 
 @app.get("/items/{item_id}")
 async def read_items_id(
-    item_id: Annotated[int, Path(title="The ID of the item to get")],
+    item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
     q: Annotated[str | None, Query(alias="item-query")] = None,
 ):
     results: dict[str, Union[str, int]] = {"item_id": item_id}
