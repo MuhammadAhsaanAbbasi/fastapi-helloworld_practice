@@ -4,6 +4,7 @@ from fastapi_helloworld import settings
 from contextlib import asynccontextmanager
 from typing import Optional, Annotated
 from fastapi.middleware.cors import CORSMiddleware
+
 class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True,)
     todo: str = Field(index=True)
