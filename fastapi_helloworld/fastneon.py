@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session, create_engine, select, Field
 from fastapi_helloworld import settings
 from contextlib import asynccontextmanager
 from typing import Optional, Annotated
-from fastapi.middleware.cors import CORSMiddleware
+
 
 class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True,)
@@ -24,14 +24,7 @@ async def life_span(app: FastAPI):
     db_create_and_tables()
     yield 
 
-app = FastAPI(lifespan = life_span, title="Hello World API with DB", 
-    version="0.0.1",
-    servers=[
-        {
-            "url": "http://0.0.0.0:8000", # ADD NGROK URL Here Before Creating GPT Action
-            "description": "Development Server"
-        }
-        ])
+app = FastAPI(lifespan = life_span, title="Hello World API with DB",)
 
 def get_session():
     with Session(engine) as session:
@@ -52,3 +45,22 @@ def get_todos(todo: Todo, session: Annotated[Session, Depends(get_session)]):
 def read_todos(session: Annotated[Session, Depends(get_session)]):
     todos = session.exec(select(Todo)).all()
     return todos
+
+@app.put("/todo/{todo_id}", response_model=Todo)
+def update_todo(todo_id: int, todo: Todo, session: Annotated[Session, Depends(get_session)]):
+    select_todo = select(Todo).where(Todo.id == todo_id)
+    selected_todo = session.exec(select_todo).first()
+    # selected_todo = session.exec(select(Todo).where(Todo.id == todo_id)).first()
+    if not selected_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    selected_todo.status = todo.status
+    session.commit()
+    session.refresh(selected_todo)
+    return selected_todo
+
+@app.delete("/todo/{todo_id}", response_model=Todo)
+def delete_todo(todo_id: int, session: Annotated[Session, Depends(get_session)]):
+    selected_todo = session.exec(select(Todo).where(Todo.id == todo_id)).first()
+    session.delete(selected_todo)
+    session.commit()
+    return selected_todo
