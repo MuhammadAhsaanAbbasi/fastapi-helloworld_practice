@@ -199,3 +199,22 @@ class Offer(BaseModel):
 @app.post("/offers/")
 async def create_offer(offer: Offer):
     return offer
+
+import json
+import jsonschema as jsonschema
+@app.get("/json")
+def get_json(name: str, age: int):
+    schema = {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "age": {"type": "integer", "minimum": 18},
+        },
+        "required": ["name", "age"],
+    }
+    data = {"name": name, "age": age}
+    try:
+        jsonschema.validate(instance=data, schema=schema)
+        return {"message": "data valid!"}
+    except jsonschema.exceptions.ValidationError as e:
+        return {"message": str(e)}
