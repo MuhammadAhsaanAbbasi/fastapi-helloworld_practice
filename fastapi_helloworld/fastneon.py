@@ -4,7 +4,6 @@ from fastapi_helloworld import settings
 from contextlib import asynccontextmanager
 from typing import Optional, Annotated
 
-
 class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True,)
     todo: str = Field(index=True)
@@ -61,6 +60,8 @@ def update_todo(todo_id: int, todo: Todo, session: Annotated[Session, Depends(ge
 @app.delete("/todo/{todo_id}", response_model=Todo)
 def delete_todo(todo_id: int, session: Annotated[Session, Depends(get_session)]):
     selected_todo = session.exec(select(Todo).where(Todo.id == todo_id)).first()
+    if not selected_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
     session.delete(selected_todo)
     session.commit()
     return selected_todo

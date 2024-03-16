@@ -218,3 +218,4 @@ def get_json(name: str, age: int):
         return {"message": "data valid!"}
     except jsonschema.exceptions.ValidationError as e:
         return {"message": str(e)}
+
