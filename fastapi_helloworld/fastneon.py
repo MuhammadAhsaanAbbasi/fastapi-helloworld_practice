@@ -9,7 +9,6 @@ class Todo(SQLModel, table=True):
     todo: str = Field(index=True)
     status: bool = Field(default=False)
 
-
 connectionString = str(settings.DATABASE_URL).replace("postgresql", "postgresql+psycopg")
 
 engine = create_engine(connectionString, connect_args={"sslmode": "require"}, pool_recycle=500)
