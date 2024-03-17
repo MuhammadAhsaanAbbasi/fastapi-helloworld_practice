@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from typing import Union, Optional, Annotated
 from fastapi_helloworld import settings
 from sqlmodel import Session, SQLModel, create_engine, select
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Form
 
 
 # class Todo(SQLModel, table=True):
@@ -219,3 +219,7 @@ def get_json(name: str, age: int):
     except jsonschema.exceptions.ValidationError as e:
         return {"message": str(e)}
 
+
+@app.post("/login/")
+def create_user(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    return {"username": username, "password": password}
