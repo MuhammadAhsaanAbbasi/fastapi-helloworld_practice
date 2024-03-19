@@ -86,92 +86,167 @@ from typing import Annotated
 #         results.update({"q": q})
 #     return results
 
-@app.get("/items/")
-async def read_items(
-    q: Annotated[
-        str | None,
-        Query(
-            alias="item-query",
-            title="Query string",
-            description="Query string for the items to search in the database that have a good match",
-            min_length=3,
-            max_length=50,
-            pattern="^fixedquery$",
-            deprecated=True,
-        ),
-    ] = None,
-):
-    results: dict[str, Union[str, list[dict[str, str]]]] = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
-    if q:
-        results.update({"q": q})
-    return results
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[
+#         str | None,
+#         Query(
+#             alias="item-query",
+#             title="Query string",
+#             description="Query string for the items to search in the database that have a good match",
+#             min_length=3,
+#             max_length=50,
+#             pattern="^fixedquery$",
+#             deprecated=True,
+#         ),
+#     ] = None,
+# ):
+#     results: dict[str, Union[str, list[dict[str, str]]]] = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
 
-@app.get("/item/")
-async def read_item(
-    hidden_query: Annotated[str | None, Query(include_in_schema=False)] = None
-):
-    if hidden_query:
-        return {"hidden_query": hidden_query}
-    else:
-        return {"hidden_query": "Not found"}
+# @app.get("/item/")
+# async def read_item(
+#     hidden_query: Annotated[str | None, Query(include_in_schema=False)] = None
+# ):
+#     if hidden_query:
+#         return {"hidden_query": hidden_query}
+#     else:
+#         return {"hidden_query": "Not found"}
 
-@app.get("/items/{item_id}")
-async def read_items_id(
-    item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
-    q: Annotated[str | None, Query(alias="item-query")] = None,
-):
-    results: dict[str, Union[str, int]] = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
-    return results
+# @app.get("/items/{item_id}")
+# async def read_items_id(
+#     item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=1000)],
+#     q: Annotated[str | None, Query(alias="item-query")] = None,
+# ):
+#     results: dict[str, Union[str, int]] = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
 
-# from pydantic import BaseModel
+# # from pydantic import BaseModel
+
+# # class Item(BaseModel):
+# #     name: str
+# #     description: str | None = None
+# #     price: float
+# #     tax: float | None = None
+
+
+# # class User(BaseModel):
+# #     username: str
+# #     full_name: str | None = None
+
+
+# # # @app.put("/items/{item_id}")
+# # # async def update_item(item_id: int, item: Item, user: User, importance: Annotated[int, Body()]):
+# # #     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+# # #     return results
+
+# # @app.put("/items/{item_id}")
+# # async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+# #     results = {"item_id": item_id, "item": item}
+# #     return results
+
+# from pydantic import BaseModel, Field
+
+
+# # class Item(BaseModel):
+# #     name: str
+# #     description: str | None = Field(
+# #         default=None, title="The description of the item", max_length=200
+# #     )
+# #     price: float = Field(gt=0, description="The price must be greater than zero")
+# #     tax: float | None = None
+
+
+# # @app.put("/items/{item_id}")
+# # async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+# #     results = {"item_id": item_id, "item": item}
+# #     return results
+
+# from pydantic import HttpUrl
+
+
+# class Image(BaseModel):
+#     url: HttpUrl
+#     name: str
+
 
 # class Item(BaseModel):
 #     name: str
 #     description: str | None = None
 #     price: float
 #     tax: float | None = None
+#     tags: set[str] = set()
+#     image: list[Image] | None = None
 
-
-# class User(BaseModel):
-#     username: str
-#     full_name: str | None = None
-
-
-# # @app.put("/items/{item_id}")
-# # async def update_item(item_id: int, item: Item, user: User, importance: Annotated[int, Body()]):
-# #     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
-# #     return results
 
 # @app.put("/items/{item_id}")
-# async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+# async def update_item(item_id: int, item: Item):
 #     results = {"item_id": item_id, "item": item}
 #     return results
 
-from pydantic import BaseModel, Field
 
-
-# class Item(BaseModel):
+# class Offer(BaseModel):
 #     name: str
-#     description: str | None = Field(
-#         default=None, title="The description of the item", max_length=200
-#     )
-#     price: float = Field(gt=0, description="The price must be greater than zero")
-#     tax: float | None = None
+#     description: str | None = None
+#     price: float
+#     items: list[Item]
 
 
-# @app.put("/items/{item_id}")
-# async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
-#     results = {"item_id": item_id, "item": item}
-#     return results
+# @app.post("/offers/")
+# async def create_offer(offer: Offer):
+#     return offer
 
-from pydantic import HttpUrl
+# import json
+# import jsonschema as jsonschema
+# @app.get("/json")
+# def get_json(name: str, age: int):
+#     schema = {
+#         "type": "object",
+#         "properties": {
+#             "name": {"type": "string"},
+#             "age": {"type": "integer", "minimum": 18},
+#         },
+#         "required": ["name", "age"],
+#     }
+#     data = {"name": name, "age": age}
+#     try:
+#         jsonschema.validate(instance=data, schema=schema)
+#         return {"message": "data valid!"}
+#     except jsonschema.exceptions.ValidationError as e:
+#         return {"message": str(e)}
 
+# class Forem(BaseModel):
+#     username: str
+#     password: str
 
-class Image(BaseModel):
-    url: HttpUrl
-    name: str
+# @app.post("/login/")
+# def create_user(users:Annotated[Forem, Body()]):
+#     username = users.username
+#     password = users.password
+#     print(username, password)
+#     return {"username": username, "password": password}
+
+# @app.get("/items/")
+# def get_items(q: Annotated[str | int, Query(max_length=20, min_length=3)]):
+#     return {"q" : q}
+
+# @app.get("/items/")
+# def get_items(q: Annotated[str | None, Query(max_length=20, min_length=3)] = None):
+#     items = {"items": "foobar"}
+#     if q:
+#         items.update({"q": q})
+#     return items
+
+from typing import Annotated
+
+from fastapi import Body, FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
 
 
 class Item(BaseModel):
@@ -179,47 +254,33 @@ class Item(BaseModel):
     description: str | None = None
     price: float
     tax: float | None = None
-    tags: set[str] = set()
-    image: list[Image] | None = None
 
 
 @app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item):
+async def update_item(
+    *,
+    item_id: int,
+    item: Annotated[
+        Item,
+        Body(
+            examples=[
+                {
+                    "name": "Foo",
+                    "description": "A very nice Item",
+                    "price": 35.4,
+                    "tax": 3.2,
+                },
+                {
+                    "name": "Bar",
+                    "price": "35.4",
+                },
+                {
+                    "name": "Baz",
+                    "price": "thirty five point four",
+                },
+            ],
+        ),
+    ],
+):
     results = {"item_id": item_id, "item": item}
     return results
-
-
-class Offer(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    items: list[Item]
-
-
-@app.post("/offers/")
-async def create_offer(offer: Offer):
-    return offer
-
-import json
-import jsonschema as jsonschema
-@app.get("/json")
-def get_json(name: str, age: int):
-    schema = {
-        "type": "object",
-        "properties": {
-            "name": {"type": "string"},
-            "age": {"type": "integer", "minimum": 18},
-        },
-        "required": ["name", "age"],
-    }
-    data = {"name": name, "age": age}
-    try:
-        jsonschema.validate(instance=data, schema=schema)
-        return {"message": "data valid!"}
-    except jsonschema.exceptions.ValidationError as e:
-        return {"message": str(e)}
-
-
-@app.post("/login/")
-def create_user(username: Annotated[str, Form()], password: Annotated[str, Form()]):
-    return {"username": username, "password": password}
