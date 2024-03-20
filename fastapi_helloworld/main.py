@@ -310,9 +310,11 @@ from uuid import UUID
 
 from typing import Annotated
 
-from fastapi import Cookie
+from fastapi import Cookie, Header
 
 
 @app.get("/items/")
-async def read_items(ads_id: Annotated[str | int, Cookie()] = "Hijabie"):
-    return {"ads_id": ads_id}
+async def read_items(
+    strange_header: Annotated[str | None, Header(convert_underscores=True)] = None
+):
+    return {"strange_header": strange_header}
